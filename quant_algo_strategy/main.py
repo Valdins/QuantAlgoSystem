@@ -4,6 +4,7 @@ from data_processing import YFinanceDataLoader
 from quant_algo_strategy.backtesting import Backtester
 from quant_algo_strategy.subscription import PlotObserver, ConsoleObserver
 from quant_algo_strategy.strategies import MovingAverageStrategy
+from quant_algo_strategy.strategies import AdvancedMovingAverageStrategy
 
 
 def main():
@@ -24,6 +25,14 @@ def main():
     ma_strategy_20_50 = MovingAverageStrategy(data, short_window=20, long_window=50)
     ma_strategy_10_30 = MovingAverageStrategy(data, short_window=10, long_window=30)
 
+    # Create advanced strategy with position management
+    adv_ma_strategy = AdvancedMovingAverageStrategy(
+        data, 
+        short_window=15,
+        take_profit_pct=4.0,
+        stop_loss_pct=4.0
+    )
+
     # Create backtester and attach observers
     backtester = Backtester()
     console_observer = ConsoleObserver()
@@ -38,6 +47,13 @@ def main():
 
     print("\nRunning backtest for MA(10, 30)...")
     backtester.run_backtest(ma_strategy_10_30, "MA(10, 30)")
+
+    print("\nRunning backtest for Advanced MA Strategy with TP/SL 4%...")
+    adv_result = backtester.run_backtest(adv_ma_strategy, "Advanced MA with TP/SL 4%")
+
+    # Plot the advanced strategy's moving averages
+    print("\nPlotting Advanced MA Strategy's moving averages...")
+    adv_ma_strategy.plot_ma()
 
     # Compare strategies
     print("\nComparing strategies...")
