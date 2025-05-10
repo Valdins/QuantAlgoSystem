@@ -2,20 +2,24 @@ from datetime import datetime, timedelta
 from data_processing import YFinanceDataLoader
 
 from quant_algo_strategy.backtesting import Backtester
+from quant_algo_strategy.configs import ConfigLoader
 from quant_algo_strategy.subscription import PlotObserver, ConsoleObserver
 from quant_algo_strategy.strategies import MovingAverageStrategy
 from quant_algo_strategy.strategies import AdvancedMovingAverageStrategy
 
 
 def main():
+    config = ConfigLoader("config.json").load_config()
+
     # Define the asset and date range
+    # https://developers.binance.com/docs/binance-spot-api-docs/faqs/market_data_only
     asset = "AAPL"  # Apple stock
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365)  # 1 year of data
 
     # Load data
     print(f"Loading data for {asset} from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
-    data_loader = YFinanceDataLoader(asset, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+    data_loader = YFinanceDataLoader(asset, start_date, end_date)
     data = data_loader.load_data()
 
     print(f"Data loaded. Shape: {data.shape}")
