@@ -1,4 +1,3 @@
-
 from kraken.spot import SpotWSClient
 
 class KrakenDataClient(SpotWSClient):
@@ -12,3 +11,26 @@ class KrakenDataClient(SpotWSClient):
             return
 
         print(message)
+
+        """
+        {
+            'channel': 'ticker',
+            'type': 'snapshot',
+            'data': [
+                {
+                    'symbol': 'BTC/USD',
+                    'bid': 104170.7,
+                    'bid_qty': 5.47575141,
+                    'ask': 104170.8,
+                    'ask_qty': 0.17344941,
+                    'last': 104170.8,
+                    'volume': 900.90713487,
+                    'vwap': 104149.5,
+                    'low': 103023.9,
+                    'high': 104943.7,
+                    'change': 666.8,
+                    'change_pct': 0.64
+                }
+            ]
+        }
+        """

@@ -8,19 +8,20 @@ async def main():
     config = ConfigLoader("config.json").load_config()
 
     krakenDataClient = KrakenDataClient(config['kraken']['api']['ws_endpoint'])
+    assets = config['kraken']['assets']
 
     await krakenDataClient.start()
 
     await krakenDataClient.subscribe(
-        params={"channel": "ticker", "symbol": ["BTC/USD"]},
+        params={"channel": "ticker", "symbol": assets},
     )
 
-    #await krakenDataClient.subscribe(params={"channel": "trade", "symbol": ["BTC/USD"]})
+    #await krakenDataClient.subscribe(params={"channel": "trade", "symbol": assets})
 
     await asyncio.sleep(3)
 
     await krakenDataClient.unsubscribe(
-        params={"channel": "ticker", "symbol": ["BTC/USD"]},
+        params={"channel": "ticker", "symbol": assets},
     )
 
     await krakenDataClient.close()

@@ -22,13 +22,11 @@ class MovingAverageStrategy(Strategy):
         super().__init__(data)
         self.short_window = short_window
         self.long_window = long_window
-        self.signals = None
-        self.positions = None
-        self.returns = None
 
-    def generate_signals(self):
+
+    def generate_signal(self):
         """
-        Generate trading signals based on moving average crossover.
+        Generate trading signal based on moving average crossover.
 
         Returns:
             pd.DataFrame: DataFrame with signals
@@ -47,8 +45,11 @@ class MovingAverageStrategy(Strategy):
         # Generate trading orders
         signals['Position'] = signals['Signal'].diff()
 
-        self.signals = signals
         return signals
+
+    def process_latest_data(self, latest_data: pd.DataFrame):
+        self.data = pd.concat([self.data, latest_data])
+
 
     def backtest(self):
         """
