@@ -13,7 +13,7 @@ def main():
 
     # Define the asset and date range
     # https://developers.binance.com/docs/binance-spot-api-docs/faqs/market_data_only
-    asset = "AAPL"  # Apple stock
+    asset = "AAPL"  # Apple Stock
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365)  # 1 year of data
 

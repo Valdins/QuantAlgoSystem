@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from datetime import datetime
 
-
 class DataLoader(ABC):
     def __init__(self):
         pass
