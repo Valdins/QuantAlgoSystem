@@ -1,0 +1,24 @@
+{
+  "version": 0.1,
+  "binance": {
+    "api": {
+      "endpoint": "https://data-api.binance.vision/api/v3/",
+      "key": "NfsCYkcSXxra6QIRhXsYBKkZri8MPvsndNBGSPyIQQCADzhbr23CwBU8DC7EbUS0",
+      "secret": "FptMnl1ITD1SuEsqEUHZ0Bphj2kCGhgsv0KclgjZPT4CTzKRtGlMBkKskzS54KCG"
+    },
+    "assets": [
+      "BTCUSDT"
+    ]
+  },
+  "kraken": {
+    "api": {
+      "ws_endpoint": "wss://demo-futures.kraken.com/ws/v1",
+      "ws_endpoint_r": "wss://ws.kraken.com/v2/",
+      "key": "Pcj8hsHP7dv/1bSX7U+vDCAAr0zKwUK6s9NB1SIBF1HO74/zLLhKOQKP",
+      "secret": "2ftlwVcdaNFokOUa/zHGYHmoESnc0A5JFaikFoXP+8wYAoj+NqURCC+zCdTlO9oYafz4keTsLi/CbP3sNwtVBw=="
+    },
+    "assets": [
+      "BTC/USD"
+    ]
+  }
+}
