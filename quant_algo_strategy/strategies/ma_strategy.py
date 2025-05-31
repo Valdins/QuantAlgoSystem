@@ -10,21 +10,20 @@ class MovingAverageStrategy(Strategy):
     A simple moving average crossover strategy.
     """
 
-    def __init__(self, data, short_window=20, long_window=50):
+    def __init__(self, short_window=20, long_window=50):
         """
         Initialize the moving average strategy.
 
         Args:
-            data (pd.DataFrame): Market data with OHLCV format
             short_window (int): Short moving average window
             long_window (int): Long moving average window
         """
-        super().__init__(data)
+        super().__init__()
         self.short_window = short_window
         self.long_window = long_window
 
 
-    def generate_signal(self):
+    def generate_signal(self, data: pd.DataFrame):
         """
         Generate trading signal based on moving average crossover.
 
