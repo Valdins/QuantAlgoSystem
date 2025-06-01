@@ -5,7 +5,6 @@ from quant_algo_strategy.backtesting import Backtester
 from quant_algo_strategy.configs import ConfigLoader
 from quant_algo_strategy.subscription import PlotObserver, ConsoleObserver
 from quant_algo_strategy.strategies import MovingAverageStrategy
-from quant_algo_strategy.strategies import AdvancedMovingAverageStrategy
 
 
 def main():

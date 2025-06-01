@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+from quant_algo_strategy.enums.signal import Signal
 from quant_algo_strategy.strategies import Strategy
 
 
@@ -22,29 +23,34 @@ class MovingAverageStrategy(Strategy):
         self.short_window = short_window
         self.long_window = long_window
 
+    def update_data(self, latest_data: pd.DataFrame):
+        """Update strategy with new candle data"""
+        self.data = pd.concat([self.data, latest_data])
 
-    def generate_signal(self, data: pd.DataFrame):
-        """
-        Generate trading signal based on moving average crossover.
+        # Keep only the necessary history
+        max_period = max(self.short_window, self.long_window)
+        if len(self.data) > max_period * 2:
+            self.data = self.data.iloc[-max_period * 2:]
 
-        Returns:
-            pd.DataFrame: DataFrame with signals
-        """
-        signals = pd.DataFrame(index=self.data.index)
-        signals['Signal'] = 0.0
+    def generate_signal(self, data: pd.DataFrame) -> Signal:
+        if len(self.data) < self.long_window:
+            return Signal.NO_ACTION
 
-        # Create short and long moving averages
-        signals['Short_MA'] = self.data['Close'].rolling(window=self.short_window, min_periods=1).mean()
-        signals['Long_MA'] = self.data['Close'].rolling(window=self.long_window, min_periods=1).mean()
+        self.data['short_ma'] = self.data['last'].rolling(self.short_window).mean()
+        self.data['long_ma'] = self.data['last'].rolling(self.long_window).mean()
 
-        # Create signals
-        signals['Signal'][self.short_window:] = np.where(
-            signals['Short_MA'][self.short_window:] > signals['Long_MA'][self.short_window:], 1.0, 0.0)
+        # Check for crossover
+        last_row = self.data.iloc[-1]
+        prev_row = self.data.iloc[-2]
 
-        # Generate trading orders
-        signals['Position'] = signals['Signal'].diff()
+        if (prev_row['short_ma'] < prev_row['long_ma'] and
+                last_row['short_ma'] > last_row['long_ma']):
+            return Signal.BUY
+        elif (prev_row['short_ma'] > prev_row['long_ma'] and
+              last_row['short_ma'] < last_row['long_ma']):
+            return Signal.SELL
 
-        return signals
+        return Signal.NO_ACTION
 
     def process_latest_data(self, latest_data: pd.DataFrame):
         self.data = pd.concat([self.data, latest_data])
