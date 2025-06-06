@@ -2,8 +2,9 @@ from enum import Enum
 
 
 class PositionType(Enum):
-    LONG = "long"
-    SHORT = "short"
+    FLAT = 0
+    LONG = 1
+    SHORT = -1
 
     def __str__(self):
         return self.value

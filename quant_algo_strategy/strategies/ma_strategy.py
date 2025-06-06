@@ -11,7 +11,7 @@ class MovingAverageStrategy(Strategy):
     A simple moving average crossover strategy.
     """
 
-    def __init__(self, short_window=20, long_window=50):
+    def __init__(self, dataset: pd.DataFrame, short_window=20, long_window=50):
         """
         Initialize the moving average strategy.
 
@@ -19,7 +19,7 @@ class MovingAverageStrategy(Strategy):
             short_window (int): Short moving average window
             long_window (int): Long moving average window
         """
-        super().__init__()
+        super().__init__(dataset)
         self.short_window = short_window
         self.long_window = long_window
 

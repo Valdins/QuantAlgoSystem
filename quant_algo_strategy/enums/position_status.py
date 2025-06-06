@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class PositionStatus(Enum):
-    OPEN = "open"
-    CLOSED = "closed"
+    CLOSED = 0
+    OPEN = 1
 
     def __str__(self):
         return self.value
