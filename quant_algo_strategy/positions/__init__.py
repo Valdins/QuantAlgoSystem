@@ -1,8 +1,7 @@
-from .positions_manager import PositionsManager
-from .exit_condition import ExitCondition
+from .positions_manager import PositionManager
 from .position import Position
 
 __all__ = [
-    "Position",
-    "PositionsManager",
+    'Position',
+    'PositionManager'
 ]

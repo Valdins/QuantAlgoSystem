@@ -4,6 +4,7 @@ import numpy as np
 
 from quant_algo_strategy.enums.signal import Signal
 from quant_algo_strategy.strategies import Strategy
+from quant_algo_strategy.enums import Timeframe, timeframe
 
 
 class MovingAverageStrategy(Strategy):
@@ -11,33 +12,36 @@ class MovingAverageStrategy(Strategy):
     A simple moving average crossover strategy.
     """
 
-    def __init__(self, dataset: pd.DataFrame, short_window=20, long_window=50):
+    def __init__(self, dataset: pd.DataFrame, data_timeframe: Timeframe, strategy_name: str, short_window: int, long_window: int):
         """
         Initialize the moving average strategy.
 
         Args:
+            data_timeframe (Timeframe): the time frame to use.
             short_window (int): Short moving average window
             long_window (int): Long moving average window
         """
-        super().__init__(dataset)
-        self.short_window = short_window
-        self.long_window = long_window
+        super().__init__(dataset, data_timeframe, strategy_name)
+        self._short_window = short_window
+        self._long_window = long_window
 
-    def update_data(self, latest_data: pd.DataFrame):
+
+    def update_with_candle(self, latest_data: pd.DataFrame):
         """Update strategy with new candle data"""
         self.data = pd.concat([self.data, latest_data])
 
         # Keep only the necessary history
-        max_period = max(self.short_window, self.long_window)
+        max_period = max(self._short_window, self._long_window)
         if len(self.data) > max_period * 2:
             self.data = self.data.iloc[-max_period * 2:]
 
-    def generate_signal(self, data: pd.DataFrame) -> Signal:
-        if len(self.data) < self.long_window:
+
+    def generate_signal(self) -> Signal:
+        if len(self.data) < self._long_window:
             return Signal.NO_ACTION
 
-        self.data['short_ma'] = self.data['last'].rolling(self.short_window).mean()
-        self.data['long_ma'] = self.data['last'].rolling(self.long_window).mean()
+        self.data['short_ma'] = self.data['last'].rolling(self._short_window).mean()
+        self.data['long_ma'] = self.data['last'].rolling(self._long_window).mean()
 
         # Check for crossover
         last_row = self.data.iloc[-1]
