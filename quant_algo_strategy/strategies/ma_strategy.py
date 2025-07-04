@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -12,7 +14,7 @@ class MovingAverageStrategy(Strategy):
     A simple moving average crossover strategy.
     """
 
-    def __init__(self, dataset: pd.DataFrame, data_timeframe: Timeframe, strategy_name: str, short_window: int, long_window: int):
+    def __init__(self, data_timeframe: Timeframe, strategy_name: str, short_window: int, long_window: int):
         """
         Initialize the moving average strategy.
 
@@ -21,14 +23,18 @@ class MovingAverageStrategy(Strategy):
             short_window (int): Short moving average window
             long_window (int): Long moving average window
         """
-        super().__init__(dataset, data_timeframe, strategy_name)
+        super().__init__(data_timeframe, strategy_name)
         self._short_window = short_window
         self._long_window = long_window
 
 
-    def update_with_candle(self, latest_data: pd.DataFrame):
+    def update_with_candle(self, latest_data: Dict[str, Any]):
         """Update strategy with new candle data"""
-        self.data = pd.concat([self.data, latest_data])
+        latest_data_df = pd.DataFrame([latest_data])
+
+        a = self.data
+
+        self.data = pd.concat([self.data, latest_data_df], ignore_index=True)
 
         # Keep only the necessary history
         max_period = max(self._short_window, self._long_window)
@@ -40,8 +46,8 @@ class MovingAverageStrategy(Strategy):
         if len(self.data) < self._long_window:
             return Signal.NO_ACTION
 
-        self.data['short_ma'] = self.data['last'].rolling(self._short_window).mean()
-        self.data['long_ma'] = self.data['last'].rolling(self._long_window).mean()
+        self.data['short_ma'] = self.data['close'].rolling(self._short_window).mean()
+        self.data['long_ma'] = self.data['close'].rolling(self._long_window).mean()
 
         # Check for crossover
         last_row = self.data.iloc[-1]

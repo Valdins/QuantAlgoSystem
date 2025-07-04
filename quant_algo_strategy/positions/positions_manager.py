@@ -152,7 +152,7 @@ class PositionManager:
 
         for position in self.positions[:]:  # Create copy to iterate
             for condition in self.exit_conditions:
-                if condition.condition_func(position, current_price, current_time):
+                if condition.condition_func(position, current_price):
                     # Close position
                     self.close_position(position, current_price, current_time, condition.name)
                     closed_positions.append(position)

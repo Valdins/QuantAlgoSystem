@@ -32,29 +32,31 @@ class Backtester(Subject):
         self.logger = logging.getLogger(__name__)
 
     def run_backtest(self, position_manager: PositionManager, timeframe_manager: TimeframeManager):
-
         for index, row in self.dataset.iterrows():
             print(row)
 
             current_price = row['close']
             current_time = row['timestamp']
 
-            # 1. Update timeframes with new tick
+            # 1. Update timeframes with new data
             completed_candles = timeframe_manager.process_tick(row)
 
             # 2. Check exit conditions for existing positions
             position_manager.check_exit_conditions(current_price, current_time)
 
-            # 3. Process strategy for each completed candle
-            strategy_timeframe = self.strategy.timeframe
+            # 3. Process strategy - check both completed and current candles
+            strategy_timeframe = self.strategy.timeframe.value  # Assuming it's an enum
 
-            # Check if we have a new candle for this strategy's timeframe
-            if completed_candles.get(strategy_timeframe):
-                self.strategy.update_with_candle(completed_candles[strategy_timeframe])
+            # Update strategy with latest data (whether completed or not)
+            latest_candle = (completed_candles.get(strategy_timeframe) or
+                             timeframe_manager.get_current_candle(strategy_timeframe))
+
+            if latest_candle:
+                self.strategy.update_with_candle(latest_candle)
                 signal = self.strategy.generate_signal()
 
                 if signal != Signal.NO_ACTION:
-                    self.logger.info(f"Strategy {self.strategy.name} generated {signal} signal at {current_price}")
+                    self.logger.info(f"Strategy {self.strategy.name} generated {signal.name} signal at {str(current_price)}")
 
                     # 4. Execute trade through position manager
                     position_manager.process_signal(
@@ -67,7 +69,7 @@ class Backtester(Subject):
             # 5. Periodic performance summary
             print(f"Summary of current positions: {position_manager.get_portfolio_summary()}")
 
-            time.sleep(0.5)
+            #time.sleep(0.1)
 
 
     def compare_strategies(self) -> None:

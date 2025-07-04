@@ -22,7 +22,6 @@ def main():
     long_window = 20
 
     ma_strategy = MovingAverageStrategy(
-        dataset=pd.DataFrame(),
         data_timeframe=timeframe,
         strategy_name='ma_strategy',
         short_window=short_window,
