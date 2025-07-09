@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  kafka:
+    image: apache/kafka-native
+    ports:
+      - "9092:9092" # For external access (e.g., your local Python scripts)
+    environment:
+      # Auto create topics on first use (you can keep this, but explicit creation is better for production)
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
+      # Configure listeners for both docker and host communication
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093 # 'kafka' is the Docker service name
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+
+      # Settings required for KRaft mode
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091 # 'localhost' here refers to the internal container's localhost
+
+      # Listener to use for broker-to-broker communication
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+
+      # Required for a single node cluster
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    healthcheck: # Add a healthcheck for Kafka to ensure it's ready
+      test: ["CMD", "sh", "-c", "nc -z localhost 9093 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  init-kafka-topics:
+    image: apache/kafka-native # Use the same Kafka image
+    command: >
+      sh -c "
+        echo 'Waiting for Kafka to be healthy...';
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9093 --list || exit 1; # Check Kafka is up
+        echo 'Kafka is healthy. Creating topics...';
+        /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic marketdata.quotes --partitions 6 --replication-factor 1 --bootstrap-server kafka:9093;
+        /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --topic orders.requests --partitions 3 --replication-factor 1 --bootstrap-server kafka:9093;
+        echo 'Topics created successfully.';
+      "
+    depends_on:
+      kafka:
+        condition: service_healthy # This makes sure Kafka is fully up before topics are created
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093 # Connects to Kafka using the internal Docker network name and port
+    depends_on:
+      - kafka
+      - init-kafka-topics # Optional: depend on topic creation for consistency
