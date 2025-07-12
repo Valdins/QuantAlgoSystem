@@ -4,6 +4,7 @@ import time
 import matplotlib.pyplot as plt
 
 from quant_algo_strategy.data_processing.timeframe_manager import TimeframeManager
+from quant_algo_strategy.kafka.KafkaTopicProducer import KafkaTopicProducer
 from quant_algo_strategy.positions.positions_manager import PositionManager
 from quant_algo_strategy.data_processing.data_loader import DataLoader
 from quant_algo_strategy.subscription import Subject
@@ -15,11 +16,12 @@ class Backtester(Subject):
     """
     Class for backtesting trading strategies.
     """
-    def __init__(self, data_loader: DataLoader, strategy: Strategy):
+    def __init__(self, data_loader: DataLoader, strategy: Strategy, kafka_topic_producer: KafkaTopicProducer):
         """
         Initialize the backtester.
         """
         super().__init__()
+        self._kafka_topic_producer = kafka_topic_producer
         self.strategy = strategy
         self.dataset = data_loader.load_data()
         self.results = []
@@ -34,6 +36,8 @@ class Backtester(Subject):
     def run_backtest(self, position_manager: PositionManager, timeframe_manager: TimeframeManager):
         for index, row in self.dataset.iterrows():
             print(row)
+            # Send to kafka
+            self._kafka_topic_producer.send(row)
 
             current_price = row['close']
             current_time = row['timestamp']
@@ -69,7 +73,7 @@ class Backtester(Subject):
             # 5. Periodic performance summary
             print(f"Summary of current positions: {position_manager.get_portfolio_summary()}")
 
-            #time.sleep(0.1)
+            time.sleep(1)
 
 
     def compare_strategies(self) -> None:

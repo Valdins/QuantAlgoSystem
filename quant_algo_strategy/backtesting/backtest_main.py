@@ -2,6 +2,7 @@ import pandas as pd
 
 from quant_algo_strategy.data_processing.timeframe_manager import TimeframeManager
 from quant_algo_strategy.data_processing.data_loader import KaggleDataLoader
+from quant_algo_strategy.kafka.KafkaTopicProducer import KafkaTopicProducer
 from quant_algo_strategy.positions.positions_manager import PositionManager
 from quant_algo_strategy.strategies import MovingAverageStrategy
 from quant_algo_strategy.backtesting import Backtester
@@ -41,12 +42,18 @@ def main():
     """
     timeframe_manager = TimeframeManager()
 
+    """
+        Kafka Topic Producer
+    """
+    kafka_topic_producer = KafkaTopicProducer(server='localhost:9092', topic_name='marketdata.quotes')
+
 
     # ------------------ Main ------------------
 
     backtester = Backtester(
         data_loader=data_loader,
-        strategy=ma_strategy
+        strategy=ma_strategy,
+        kafka_topic_producer=kafka_topic_producer
     )
 
     backtester.run_backtest(
