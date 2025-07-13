@@ -1,5 +1,4 @@
 from typing import Dict, Any
-from datetime import datetime
 import pandas as pd
 
 
@@ -11,9 +10,11 @@ class DataManager:
             'change', 'change_pct'
         ])
         self.data.set_index('timestamp', inplace=True)
+        self.data_limit_1_min = 120 # 2h limit
 
     def process_latest_data(self, market_data: Dict[str, Any]) -> pd.DataFrame:
         # Convert timestamp string to datetime if needed
+        print("Processing latest data")
         if isinstance(market_data['timestamp'], str):
             market_data['timestamp'] = pd.to_datetime(market_data['timestamp'])
 
@@ -23,6 +24,11 @@ class DataManager:
 
         # Append new data to existing DataFrame
         self.data = pd.concat([self.data, new_data])
+
+        # Keep latest 120 records
+        self.data = self.data[-self.data_limit_1_min:]
+
+        print(f"Data contains {len(self.data)} entries")
 
         return self.data
 

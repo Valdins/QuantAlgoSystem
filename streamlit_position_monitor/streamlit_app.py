@@ -1,3 +1,4 @@
+import altair as alt
 import streamlit as st
 import pandas as pd
 
@@ -8,13 +9,39 @@ startup()
 
 st.title("Market and Positions Monitor")
 
-market_data = st.session_state["message_queue"]
+data_manager = st.session_state['data_manager']
+kafka_topic_consumer = st.session_state['kafka_thread']
 
-chart_data = pd.DataFrame(
-   {
-      "timestamp": market_data["timestamp"],
-      "close": market_data["close"],
-   }
-)
+# Create a placeholder for the chart
+chart_placeholder = st.empty()
 
-st.line_chart(chart_data, x="timestamp", y="close")
+while True:
+   while not st.session_state["message_queue"].empty():
+      message = st.session_state["message_queue"].get()
+      data = data_manager.process_latest_data(message)
+
+      # Update the existing chart data
+      new_data = pd.DataFrame({
+         "timestamp": data.index,
+         "close": data["close"],
+      })
+      st.session_state["chart_data"] = new_data
+
+      # Calculate min/max values for y-axis padding
+      y_min = st.session_state["chart_data"]["close"].min()
+      y_max = st.session_state["chart_data"]["close"].max()
+      y_padding = (y_max - y_min) * 0.1
+
+      # Create Altair chart with custom y-axis range
+      chart = alt.Chart(st.session_state["chart_data"]).mark_line().encode(
+         x='timestamp:T',
+         y=alt.Y('close:Q', scale=alt.Scale(
+            domain=[y_min - y_padding, y_max + y_padding]
+         ))
+      ).properties(
+         width=700,
+         height=400
+      )
+
+      # Update the chart in place
+      chart_placeholder.altair_chart(chart, use_container_width=True)

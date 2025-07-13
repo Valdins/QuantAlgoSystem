@@ -73,7 +73,7 @@ class Backtester(Subject):
             # 5. Periodic performance summary
             print(f"Summary of current positions: {position_manager.get_portfolio_summary()}")
 
-            time.sleep(1)
+            #time.sleep(1)
 
 
     def compare_strategies(self) -> None:
