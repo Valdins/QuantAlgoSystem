@@ -16,6 +16,12 @@ def main():
     data_loader = KaggleDataLoader()
 
     """
+        Kafka Topic Producer
+    """
+    market_data_kafka_topic_producer = KafkaTopicProducer(server='localhost:9092', topic_name='marketdata.quotes')
+    positions_kafka_topic_producer = KafkaTopicProducer(server='localhost:9092', topic_name='positions.quotes.v1')
+
+    """
         Strategy
     """
     timeframe = Timeframe.MIN_15
@@ -33,6 +39,7 @@ def main():
         Positions Management
     """
     position_manager = PositionManager(
+        kafka_topic_producer=positions_kafka_topic_producer,
         symbol='BTC/USD',
         initial_capital=1000
     )
@@ -42,18 +49,12 @@ def main():
     """
     timeframe_manager = TimeframeManager()
 
-    """
-        Kafka Topic Producer
-    """
-    kafka_topic_producer = KafkaTopicProducer(server='localhost:9092', topic_name='marketdata.quotes')
-
-
     # ------------------ Main ------------------
 
     backtester = Backtester(
         data_loader=data_loader,
         strategy=ma_strategy,
-        kafka_topic_producer=kafka_topic_producer
+        kafka_topic_producer=market_data_kafka_topic_producer
     )
 
     backtester.run_backtest(

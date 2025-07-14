@@ -1,13 +1,12 @@
-import altair as alt
 import streamlit as st
+import altair as alt
 import pandas as pd
 
-from src.singletons.startup import startup
-
+from ..singletons.startup import startup
 
 startup()
 
-st.title("Market and Positions Monitor")
+st.title("Live Positions Monitor")
 
 data_manager = st.session_state['data_manager']
 
@@ -15,8 +14,8 @@ data_manager = st.session_state['data_manager']
 chart_placeholder = st.empty()
 
 while True:
-   while not st.session_state["market_data_message_queue"].empty():
-      message = st.session_state["market_data_message_queue"].get()
+   while not st.session_state["positions_kafka_thread"].empty():
+      message = st.session_state["positions_kafka_thread"].get()
       data = data_manager.process_latest_market_data(message)
 
       # Update the existing chart data

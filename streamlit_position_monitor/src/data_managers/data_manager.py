@@ -2,7 +2,7 @@ from typing import Dict, Any
 import pandas as pd
 
 
-class DataManager:
+class MarketDataManager:
     def __init__(self):
         self.data = pd.DataFrame(columns=[
             'timestamp', 'bid', 'high', 'low', 'close', 'volume',
@@ -12,9 +12,9 @@ class DataManager:
         self.data.set_index('timestamp', inplace=True)
         self.data_limit_1_min = 120 # 2h limit
 
-    def process_latest_data(self, market_data: Dict[str, Any]) -> pd.DataFrame:
+    def process_latest_market_data(self, market_data: Dict[str, Any]) -> pd.DataFrame:
         # Convert timestamp string to datetime if needed
-        print("Processing latest data")
+        print("Processing latest market data")
         if isinstance(market_data['timestamp'], str):
             market_data['timestamp'] = pd.to_datetime(market_data['timestamp'])
 
@@ -34,6 +34,46 @@ class DataManager:
 
     def get_latest_data(self) -> pd.DataFrame:
         return self.data.tail(1)
+
+
+class PositionsDataManager:
+    def __init__(self):
+        self.data = {
+            "initial_capital": 0,
+            "current_capital": 0,
+            "total_return_pct": 0.0,
+            "total_profit": 0,
+            "unrealized_pnl": 0,
+            "open_positions": 0,
+            "total_positions": 0,
+            "winning_positions": 0,
+            "win_rate_pct": 0,
+            "positions_by_strategy": {}
+        }
+
+    def process_latest_positions_data(self, positions_data: Dict[str, Any]) -> Dict[str, Any]:
+        # Convert timestamp string to datetime if needed
+        print("Processing latest positions data")
+
+        self.data = positions_data
+
+        return self.data
+
+    def get_latest_data(self) -> Dict[str, Any]:
+        return self.data
+
+# {
+#     "initial_capital": 1000,
+#     "current_capital": 1000,
+#     "total_return_pct": 0.0,
+#     "total_profit": 0,
+#     "unrealized_pnl": 0,
+#     "open_positions": 0,
+#     "total_positions": 0,
+#     "winning_positions": 0,
+#     "win_rate_pct": 0,
+#     "positions_by_strategy": {}
+# }
 
 
 # {

@@ -1,13 +1,12 @@
-import altair as alt
 import streamlit as st
+import altair as alt
 import pandas as pd
 
-from src.singletons.startup import startup
-
+from ..singletons.startup import startup
 
 startup()
 
-st.title("Market and Positions Monitor")
+st.title("Live Market Data View")
 
 data_manager = st.session_state['data_manager']
 

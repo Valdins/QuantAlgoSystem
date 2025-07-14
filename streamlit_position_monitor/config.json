@@ -1,6 +1,9 @@
 {
   "kafka":{
-    "topic" : "marketdata.quotes",
+    "topics" : {
+      "market_data": "marketdata.quotes",
+      "positions_data": "positions.quotes.v1"
+    },
     "server" : "localhost:9092"
   }
 }

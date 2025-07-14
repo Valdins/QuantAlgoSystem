@@ -18,7 +18,7 @@ class Backtester(Subject):
     """
     def __init__(self, data_loader: DataLoader, strategy: Strategy, kafka_topic_producer: KafkaTopicProducer):
         """
-        Initialize the backtester.
+            Initialize the backtester.
         """
         super().__init__()
         self._kafka_topic_producer = kafka_topic_producer
@@ -73,7 +73,7 @@ class Backtester(Subject):
             # 5. Periodic performance summary
             print(f"Summary of current positions: {position_manager.get_portfolio_summary()}")
 
-            #time.sleep(1)
+            time.sleep(1)
 
 
     def compare_strategies(self) -> None:

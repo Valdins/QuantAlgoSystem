@@ -24,20 +24,31 @@ def startup():
         with open(config_path, 'r') as f:
             st.session_state['config'] = json.load(f)
 
-    if 'kafka_thread' not in st.session_state:
-        print("Starting Kafka connection...")
+    if 'market_data_kafka_thread' not in st.session_state:
+        print("Starting Market Data Kafka connection...")
 
-        kafka_topic_consumer = KafkaTopicConsumer(
-            topic_name=st.session_state['config']['kafka']['topic'],
+        market_data_kafka_topic_consumer = KafkaTopicConsumer(
+            topic_name=st.session_state['config']['kafka']['topics']['market_data'],
             server=st.session_state['config']['kafka']['server']
         )
-        print("Add Kafka thread")
-        kafka_thread = threading.Thread(target=kafka_topic_consumer.start_to_process_messages, daemon=True)
-        add_script_run_ctx(kafka_thread)
-        print("Kafka Start")
-        kafka_thread.start()
-        print("After Kafka thread")
-        st.session_state['kafka_thread'] = kafka_thread
+        print("Add Market Data Kafka thread")
+        market_data_kafka_thread = threading.Thread(target=market_data_kafka_topic_consumer.start_to_process_market_data_messages, daemon=True)
+        add_script_run_ctx(market_data_kafka_thread)
+        market_data_kafka_thread.start()
+        st.session_state['market_data_kafka_thread'] = market_data_kafka_thread
+
+    if 'positions_kafka_thread' not in st.session_state:
+        print("Starting Positions Kafka connection...")
+
+        positions_kafka_topic_consumer = KafkaTopicConsumer(
+            topic_name=st.session_state['config']['kafka']['topics']['positions_data'],
+            server=st.session_state['config']['kafka']['server']
+        )
+        print("Add Positions Kafka thread")
+        positions_kafka_thread = threading.Thread(target=positions_kafka_topic_consumer.start_to_process_positions_messages, daemon=True)
+        add_script_run_ctx(positions_kafka_thread)
+        positions_kafka_thread.start()
+        st.session_state['positions_kafka_thread'] = positions_kafka_thread
 
     if 'data_manager' not in st.session_state:
         print("Set DataManager")

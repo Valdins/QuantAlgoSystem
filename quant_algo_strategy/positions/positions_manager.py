@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from typing import List, Callable, Optional, Dict
 
+from quant_algo_strategy.kafka.KafkaTopicProducer import KafkaTopicProducer
 from .exit_condition import ExitCondition
 from .position import Position
 from quant_algo_strategy.enums import (
@@ -16,14 +17,15 @@ class PositionManager:
         Position Manager with flexible exit conditions.
     """
 
-    def __init__(self, symbol: str, initial_capital: float = 10000):
+    def __init__(self, kafka_topic_producer: KafkaTopicProducer, symbol: str, initial_capital: float = 10000):
+        self._kafka_topic_producer = kafka_topic_producer
         self.symbol = symbol
         self.initial_capital = initial_capital
         self.capital = initial_capital
         self.positions: List[Position] = []
         self.closed_positions: List[Position] = []
         self.exit_conditions: List[ExitCondition] = []
-        self.max_positions = 5  # Maximum concurrent positions
+        self.max_positions = 10  # Maximum concurrent positions
         self.risk_per_trade = 0.05  # 5% risk per trade
 
         # Setup default exit conditions
@@ -229,7 +231,7 @@ class PositionManager:
         # Current open positions value
         unrealized_pnl = sum(p.calculate_profit_absolute() for p in self.positions) if self.positions else 0
 
-        return {
+        positions_summary = {
             'initial_capital': self.initial_capital,
             'current_capital': self.capital,
             'total_return_pct': total_return,
@@ -241,6 +243,10 @@ class PositionManager:
             'win_rate_pct': win_rate,
             'positions_by_strategy': self._get_positions_by_strategy()
         }
+
+        self._kafka_topic_producer.send(positions_summary)
+
+        return positions_summary
 
 
     def _get_positions_by_strategy(self) -> Dict:
