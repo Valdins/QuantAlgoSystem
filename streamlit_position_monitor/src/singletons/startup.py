@@ -8,12 +8,15 @@ import streamlit as st
 from streamlit.runtime.scriptrunner_utils.script_run_context import add_script_run_ctx
 
 from ..kafka.kafka_topic_consumer import KafkaTopicConsumer
-from ..data_managers.data_manager import DataManager
+from ..data_managers.data_manager import MarketDataManager, PositionsDataManager
 
 
 def startup():
-    if "message_queue" not in st.session_state:
-        st.session_state["message_queue"] = queue.Queue()
+    if "market_data_message_queue" not in st.session_state:
+        st.session_state["market_data_message_queue"] = queue.Queue()
+
+    if "positions_message_queue" not in st.session_state:
+        st.session_state["positions_message_queue"] = queue.Queue()
 
     if "chart_data" not in st.session_state:
         st.session_state["chart_data"] = pd.DataFrame(columns=["timestamp", "close"])
@@ -50,6 +53,10 @@ def startup():
         positions_kafka_thread.start()
         st.session_state['positions_kafka_thread'] = positions_kafka_thread
 
-    if 'data_manager' not in st.session_state:
+    if 'market_data_data_manager' not in st.session_state:
         print("Set DataManager")
-        st.session_state['data_manager'] = DataManager()
+        st.session_state['market_data_data_manager'] = MarketDataManager()
+
+    if 'positions_data_manager' not in st.session_state:
+        print("Set DataManager")
+        st.session_state['positions_data_manager'] = PositionsDataManager()

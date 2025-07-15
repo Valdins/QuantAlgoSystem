@@ -1,45 +1,71 @@
 import streamlit as st
-import altair as alt
-import pandas as pd
 
-from ..singletons.startup import startup
 
-startup()
+def positions_page():
+    st.set_page_config(
+        page_title="Live Positions Monitor",
+        page_icon="💷",
+    )
 
-st.title("Live Positions Monitor")
+    st.title("Live Positions Monitor 💷")
 
-data_manager = st.session_state['data_manager']
+    data_manager = st.session_state['positions_data_manager']
 
-# Create a placeholder for the chart
-chart_placeholder = st.empty()
+    # Create static layout elements
+    st.subheader("Capital", divider="red")
+    capital_cols = st.columns(4)
 
-while True:
-   while not st.session_state["positions_kafka_thread"].empty():
-      message = st.session_state["positions_kafka_thread"].get()
-      data = data_manager.process_latest_market_data(message)
+    st.subheader("Positions", divider="orange")
+    positions_cols = st.columns(4)
 
-      # Update the existing chart data
-      new_data = pd.DataFrame({
-         "timestamp": data.index,
-         "close": data["close"],
-      })
-      st.session_state["chart_data"] = new_data
+    # Create placeholders in their respective columns
+    metrics_containers = {
+        "Initial Capital": capital_cols[0].empty(),
+        "Current Capital": capital_cols[1].empty(),
+        "Total Return %": capital_cols[2].empty(),
+        "Total Profit": capital_cols[3].empty(),
+        "Open Positions": positions_cols[0].empty(),
+        "Total Positions": positions_cols[1].empty(),
+        "Winning Positions": positions_cols[2].empty(),
+        "Win Rate %": positions_cols[3].empty()
+    }
 
-      # Calculate min/max values for y-axis padding
-      y_min = st.session_state["chart_data"]["close"].min()
-      y_max = st.session_state["chart_data"]["close"].max()
-      y_padding = (y_max - y_min) * 0.1
+    while True:
+        while not st.session_state["positions_message_queue"].empty():
+            message = st.session_state["positions_message_queue"].get()
+            data = data_manager.process_latest_positions_data(message)
 
-      # Create Altair chart with custom y-axis range
-      chart = alt.Chart(st.session_state["chart_data"]).mark_line().encode(
-         x='timestamp:T',
-         y=alt.Y('close:Q', scale=alt.Scale(
-            domain=[y_min - y_padding, y_max + y_padding]
-         ))
-      ).properties(
-         width=700,
-         height=400
-      )
-
-      # Update the chart in place
-      chart_placeholder.altair_chart(chart, use_container_width=True)
+            # Update all metrics
+            metrics_containers["Initial Capital"].metric(
+                label="Initial Capital",
+                value=f"{data['initial_capital']} £"
+            )
+            metrics_containers["Current Capital"].metric(
+                label="Current Capital",
+                value=f"{round(data['current_capital'], 2)} £",
+                delta=f"{round(data['current_capital'] - data['initial_capital'], 2)} £"
+            )
+            metrics_containers["Total Return %"].metric(
+                label="Total Return %",
+                value=round(data["total_return_pct"], 2)
+            )
+            metrics_containers["Total Profit"].metric(
+                label="Total Profit",
+                value=f"{round(data['total_profit'], 2)} £"
+            )
+            metrics_containers["Open Positions"].metric(
+                label="Open Positions",
+                value=data["open_positions"]
+            )
+            metrics_containers["Total Positions"].metric(
+                label="Total Positions",
+                value=data["total_positions"]
+            )
+            metrics_containers["Winning Positions"].metric(
+                label="Winning Positions",
+                value=data["winning_positions"]
+            )
+            metrics_containers["Win Rate %"].metric(
+                label="Win Rate %",
+                value=round(data["win_rate_pct"], 2)
+            )

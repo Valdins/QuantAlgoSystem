@@ -1,46 +1,80 @@
-import altair as alt
 import streamlit as st
-import pandas as pd
 
 from src.singletons.startup import startup
+from src.pages.market_data_page import market_data_page
+from src.pages.positions_page import positions_page
 
+def home_page():
+   startup()
 
-startup()
+   st.set_page_config(
+       page_title="Algo Trading System UI",
+       page_icon="🏛️",
+   )
 
-st.title("Market and Positions Monitor")
+   st.sidebar.title("Algo Trading System UI")
 
-data_manager = st.session_state['data_manager']
+   st.title("Welcome to the Algo Trading System Dashboard 🏛️")
 
-# Create a placeholder for the chart
-chart_placeholder = st.empty()
+   # Add standalone badges
+   st.badge("New")
+   st.badge("Success", icon=":material/check:", color="green")
 
-while True:
-   while not st.session_state["market_data_message_queue"].empty():
-      message = st.session_state["market_data_message_queue"].get()
-      data = data_manager.process_latest_market_data(message)
+   # Overview section with colored text
+   st.markdown("""
+       ## :blue[Overview]
 
-      # Update the existing chart data
-      new_data = pd.DataFrame({
-         "timestamp": data.index,
-         "close": data["close"],
-      })
-      st.session_state["chart_data"] = new_data
+       This dashboard provides :green[real-time monitoring] and :orange[visualization tools] for algorithmic trading strategies. 
+       Track your trading performance and market movements all in one place.
+   """)
 
-      # Calculate min/max values for y-axis padding
-      y_min = st.session_state["chart_data"]["close"].min()
-      y_max = st.session_state["chart_data"]["close"].max()
-      y_padding = (y_max - y_min) * 0.1
+   # Add a "New" badge for the features section
+   st.markdown("## Features :violet-badge[:material/star: Premium]")
 
-      # Create Altair chart with custom y-axis range
-      chart = alt.Chart(st.session_state["chart_data"]).mark_line().encode(
-         x='timestamp:T',
-         y=alt.Y('close:Q', scale=alt.Scale(
-            domain=[y_min - y_padding, y_max + y_padding]
-         ))
-      ).properties(
-         width=700,
-         height=400
-      )
+   # Market Data View section with highlighting and emojis
+   st.markdown("""
+       ### 📈 :red[Live Market Data View]
 
-      # Update the chart in place
-      chart_placeholder.altair_chart(chart, use_container_width=True)
+       - :green[Real-time] price charts for monitored assets
+       - :blue-background[Visual trend analysis] with dynamic scaling
+       - :orange[Instant market updates] for informed decision making
+   """)
+
+   # Positions Monitor section with colored text and badges
+   st.markdown("""
+       ### 💷 :blue[Live Positions Monitor] :green-badge[⚠️ Live]
+
+       - Track :violet[open] and :gray[closed] trading positions
+       - Monitor key performance metrics:
+           - Initial and current capital
+           - Total returns and profits
+           - Win rate and position statistics
+   """)
+
+   # Getting Started section with rainbow text
+   st.markdown("""
+       ## :rainbow[Getting Started]
+
+       Use the navigation menu to switch between views. Data is updated in real-time from 
+       connected trading systems and market data feeds.
+   """)
+
+   # Add a bouquet of emojis
+   st.markdown("### Trading Instruments Available: :chart_with_upwards_trend::currency_exchange::moneybag::gem::chart_with_downwards_trend:")
+
+   # Add a multi-line text with proper line breaks
+   st.markdown("""
+       ---
+
+       *Developed for algorithmic trading strategy monitoring and evaluation*  
+       *Version 1.0.0*  
+       *© 2023 Algo Trading Systems*
+   """)
+
+pg = st.navigation([
+   st.Page(home_page, title="Home", icon="🏛️"),
+   st.Page(positions_page, title="Live Positions Monitor", icon="💷"),
+   st.Page(market_data_page, title="Live Market Data View", icon="📈"),
+])
+
+pg.run()
